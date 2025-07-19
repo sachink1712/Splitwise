@@ -12,6 +12,6 @@ Example:
 
 
 Final Split:
-Person A - 1500
-Person B - 2250
-Person C - 1750
+- Person A - 1500
+- Person B - 2250
+- Person C - 1750
