@@ -1,4 +1,6 @@
 # Splitwise
+Application link - https://splitwise-basic.streamlit.app/
+
 This application is a basic version of splitwise. This works only when all the expenses are bared by one person. This app has the feature to give split for each person seperately according to the amount they bare. A basic example is mentioned below.
 
 Example:
