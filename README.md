@@ -2,6 +2,7 @@
 This application is a basic version of splitwise. This works only when all the expenses are bared by one person. This app has the feature to give split for each person seperately according to the amount they bare. A basic example is mentioned below.
 
 Example:
+
 **People**: person A, person B, person C
 
 | Amount | Owed By                          |
