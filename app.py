@@ -31,41 +31,49 @@ else:
     st.success(f"People Added:  {', '.join(st.session_state.splitwise.names)}")
 
 # ----- ADD EXPENSES -----
-def get_expenses():
+def lock_expense_count():
     st.session_state.expenses_submitted = True
+    st.session_state.locked_expense_count = st.session_state.temp_expense_count
 
-
+# 💡 Only proceed if people are added
 if st.session_state.people_added:
-    no_of_expenses = st.session_state.get("no_of_expenses", 1)
 
-    if st.session_state.expenses_submitted:
+    # Show number input if not locked yet
+    if not st.session_state.expenses_submitted:
+        st.number_input("How many expenses?", min_value=1, key="temp_expense_count")
+        st.button("✅ Confirm Expense Count", on_click=lock_expense_count)
+
+    # Only continue if locked_expense_count is now set
+    if st.session_state.expenses_submitted and "locked_expense_count" in st.session_state:
+        no_of_expenses = st.session_state.locked_expense_count
         st.success(f"Number of Expenses: {no_of_expenses}")
-    else:
-        no_of_expenses = st.number_input("How many expenses?: ", min_value=1, key="no_of_expenses")
-        st.button("Add Expense Count", on_click=get_expenses)
 
-    if len(st.session_state.expense_entries) < no_of_expenses:
-        st.subheader(f"➕ Add Expense {len(st.session_state.expense_entries) + 1} of {no_of_expenses}")
-        amount = st.number_input("Enter Amount: ", min_value=1, key=f"amount_{len(st.session_state.expense_entries)}")
-        shared_by = st.multiselect("Split Among", st.session_state.splitwise.names, key=f"people_{len(st.session_state.expense_entries)}")
+        # Add each expense
+        if len(st.session_state.expense_entries) < no_of_expenses:
+            current_idx = len(st.session_state.expense_entries)
+            st.subheader(f"➕ Add Expense {current_idx + 1} of {no_of_expenses}")
+            amount = st.number_input("Enter Amount:", min_value=1, key=f"amount_{current_idx}")
+            shared_by = st.multiselect("Split Among", st.session_state.splitwise.names, key=f"people_{current_idx}")
 
-        if st.button("Add this Expense"):
-            if not shared_by:
-                st.warning("Please select at least one person.")
-            elif amount <= 0:
-                st.warning("Amount must be greater than 0")
-            else:
-                st.session_state.expense_entries.append({"amount": amount,"people": shared_by})
-                st.success("Expense Added.")
+            if st.button("Add this Expense", key=f"add_expense_{current_idx}"):
+                if not shared_by:
+                    st.warning("Please select at least one person.")
+                else:
+                    st.session_state.expense_entries.append({"amount": amount, "people": shared_by})
+                    st.success("Expense Added ✅")
+                    # st.experimental_rerun()
 
+        # Submit all
         if len(st.session_state.expense_entries) == no_of_expenses:
             st.subheader("✅ Submit All Expenses")
             if st.button("Submit All Expenses"):
                 for e in st.session_state.expense_entries:
-                    st.session_state.splitwise.get_expense(e["amount"],e["people"])
-                st.success("All expenses submitted to splitwise")
-                st.session_state.expense_entries = []
-                st.session_state.expenses_submitted = True
+                    st.session_state.splitwise.get_expense(e["amount"], e["people"])
+
+                st.success("All expenses submitted.")
+                st.session_state.expenses_submitted = False
+
+
 
 # --- SHOW ADDED EXPENSES (Preview) ---
 if st.session_state.expense_entries:
